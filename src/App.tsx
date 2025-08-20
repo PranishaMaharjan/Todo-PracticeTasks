@@ -9,12 +9,13 @@ import { useState } from "react";
 type Tasks = {
   id: number;
   title: string;
+  completed: boolean
 };
 
 function App() {
   const [tasks, setTasks] = useState<Tasks[]>([
-    { id: 1, title: "Learn React" },
-    { id: 2, title: "Learn TypeScript" },
+    { id: 1, title: "Learn React", completed: true },
+    { id: 2, title: "Learn TypeScript", completed: false },
   ]);
   const [input, setInput] = useState("");
   // const [editTasks, setEditTasks] = useState<boolean>(true);
@@ -48,6 +49,11 @@ function App() {
   //SEARCH TASK
   const todoSearch = tasks.filter((e) => e.title.toLowerCase().includes(searchTask.toLowerCase()));
 
+  //COMPLETE/INCOMPLETE TASK 
+  const toggleCompleteTask = (id: number) => {
+    setTasks((prev) => prev.map((task) => task.id == id ? { ...task, completed: !task.completed } : task))//if task completed ie completed=true , toggle into completed=false and viceversA
+  }
+
   return (
     <div>
       <div>
@@ -80,6 +86,7 @@ function App() {
           >
             {editId === task.id ? (<input type="text" value={editTask} onChange={(e) => setEditTask(e.target.value)} />) : (<span>{task.title}</span>)}
             <div className="flex gap-4">
+              <input type="checkbox" checked={task.completed} onChange={() => toggleCompleteTask(task.id)} />
               {editId === task.id ? (<button onClick={() => saveEdit(task.id)}>Save</button>) : (<button onClick={() => startEdit(task)}>Edit</button>)}
               <button onClick={() => todoRemover(task.id)}>Delete</button>
 
