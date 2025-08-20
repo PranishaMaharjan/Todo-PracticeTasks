@@ -22,6 +22,7 @@ function App() {
   const [editId, setEditId] = useState<number | null>(null);
   const [editTask, setEditTask] = useState<string>("");
   const [searchTask, setSearchTask] = useState<string>("");
+  const [sortTask, setSortTask] = useState<"name" | "completed" | "none">("none");
 
 
   //EDIT TASK
@@ -54,6 +55,17 @@ function App() {
     setTasks((prev) => prev.map((task) => task.id == id ? { ...task, completed: !task.completed } : task))//if task completed ie completed=true , toggle into completed=false and viceversA
   }
 
+  //SORT TASKS BY NAME AND COMPLETED TOGGLE CHECKBOX
+  const todoSort = [...todoSearch].sort((a, b) => {
+    if (sortTask === "name") {
+      return a.title.localeCompare(b.title);
+    }
+    else if (sortTask === "completed") {
+      return Number(b.completed) - Number(a.completed);
+    }
+    return 0;
+  })
+
   return (
     <div>
       <div>
@@ -74,12 +86,22 @@ function App() {
           <input className="bg-white rounded-sm p-2 border-2 border-black max-w-48"
             type="text" value={searchTask} onChange={(e) => setSearchTask(e.target.value)} placeholder="Search Tasks..." />
         </div>
+
+
+      </div>
+
+      <div className="my-4 flex">
+        <select className="border-1 rounded-xl px-4 py-1" value={sortTask} onChange={(e) => setSortTask(e.target.value as "name" | "completed" | "none")} >
+          <option value="none">No sorting</option>
+          <option value="name">Sort by name</option>
+          <option value="completed">Sort by completion</option>
+        </select>
       </div>
 
 
-
       <ul className="space-y-2">
-        {todoSearch.length > 0 ? (todoSearch.map((task) => (
+
+        {todoSort.length > 0 ? (todoSort.map((task) => (
           <li
             key={task.id}
             className="flex items-center justify-between p-2 border rounded"
