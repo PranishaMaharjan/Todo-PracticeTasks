@@ -17,11 +17,19 @@ function App() {
     { id: 2, title: "Learn TypeScript" },
   ]);
   const [input, setInput] = useState("");
-  const [editTasks, setEditTasks] = useState<boolean>(true);
+  // const [editTasks, setEditTasks] = useState<boolean>(true);
+  const [editId, setEditId] = useState<number | null>(null);
+  const [editTask, setEditTask] = useState<string>("");
 
-  const todoEditer = (id: number) => {
-    setEditTasks(false)
+  const startEdit = (task: Tasks) => {
+    setEditId(task.id);
+    setEditTask(task.title);
   }
+
+  const saveEdit = (id: number) => {
+    setTasks((prev) => prev.map((tasks) => (tasks.id === id ? { ...tasks, title: editTask } : tasks)))
+  }
+
   const todoAdder = () => {
     setTasks((prev) => [...prev, { id: Math.random(), title: input }]);
   };
@@ -36,8 +44,8 @@ function App() {
       <div>
         <h1 className="text-4xl font-bold">Todo Lists</h1>
       </div>
-      <div className="mb-4">
-        <div className="flex justify-center">
+      <div className="my-4 flex justify-center">
+        <div className="flex gap-4">
           <input
             className="bg-white rounded-sm p-2 border-2 border-black"
             type="text"
@@ -53,11 +61,13 @@ function App() {
             key={task.id}
             className="flex items-center justify-between p-2 border rounded"
           >
-            <input disabled={editTasks} value={task.title} />
-            <div className="flex justify-between gap-2">
-              <button onClick={() => todoEditer(task.id)}>Edit</button>
+            {editId === task.id ? (<input type="text" value={editTask} onChange={(e) => setEditTask(e.target.value)} />) : (<span>{task.title}</span>)}
+            <div className="flex gap-4">
+              {editId === task.id ? (<button onClick={() => saveEdit(task.id)}>Save</button>) : (<button onClick={() => startEdit(task)}>Edit</button>)}
               <button onClick={() => todoRemover(task.id)}>Delete</button>
+
             </div>
+
           </li>
         ))}
       </ul>
