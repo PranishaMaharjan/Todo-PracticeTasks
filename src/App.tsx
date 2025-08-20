@@ -20,7 +20,10 @@ function App() {
   // const [editTasks, setEditTasks] = useState<boolean>(true);
   const [editId, setEditId] = useState<number | null>(null);
   const [editTask, setEditTask] = useState<string>("");
+  const [searchTask, setSearchTask] = useState<string>("");
 
+
+  //EDIT TASK
   const startEdit = (task: Tasks) => {
     setEditId(task.id);
     setEditTask(task.title);
@@ -30,21 +33,27 @@ function App() {
     setTasks((prev) => prev.map((tasks) => (tasks.id === id ? { ...tasks, title: editTask } : tasks)))
   }
 
+  //ADD TASK
   const todoAdder = () => {
     setTasks((prev) => [...prev, { id: Math.random(), title: input }]);
   };
 
+  //DELETE TASK
   const todoRemover = (id: number) => {
     console.log(id);
     const removeTasks = tasks.filter((e) => e.id !== id);
     setTasks(removeTasks);
   };
+
+  //SEARCH TASK
+  const todoSearch = tasks.filter((e) => e.title.toLowerCase().includes(searchTask.toLowerCase()));
+
   return (
     <div>
       <div>
         <h1 className="text-4xl font-bold">Todo Lists</h1>
       </div>
-      <div className="my-4 flex justify-center">
+      <div className="my-10 flex justify-between items-center">
         <div className="flex gap-4">
           <input
             className="bg-white rounded-sm p-2 border-2 border-black"
@@ -54,9 +63,17 @@ function App() {
           />
           <button onClick={todoAdder}>Add</button>
         </div>
+
+        <div className="flex gap-4">
+          <input className="bg-white rounded-sm p-2 border-2 border-black max-w-48"
+            type="text" value={searchTask} onChange={(e) => setSearchTask(e.target.value)} placeholder="Search Tasks..." />
+        </div>
       </div>
+
+
+
       <ul className="space-y-2">
-        {tasks.map((task) => (
+        {todoSearch.length > 0 ? (todoSearch.map((task) => (
           <li
             key={task.id}
             className="flex items-center justify-between p-2 border rounded"
@@ -69,7 +86,8 @@ function App() {
             </div>
 
           </li>
-        ))}
+        ))) : "No tasks found"}
+
       </ul>
 
       {/* <AsncWrapper isError={peopleAPI.isError} isLoading={peopleAPI.isLoading} component={
