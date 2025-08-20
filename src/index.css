@@ -24,3 +24,9 @@ button {
 button:hover {
   border-color: #646cff;
 }
+
+button.theme_bottom {
+  padding: 0px !important;
+  border-radius: 40px;
+  border: 0;
+}
