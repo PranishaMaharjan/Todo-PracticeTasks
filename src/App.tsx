@@ -5,6 +5,7 @@
 
 import "./App.css";
 import { useState } from "react";
+import { TBoard, TCard, TColumn } from '@/shared/data';
 
 type Tasks = {
   id: number;
@@ -24,6 +25,7 @@ function App() {
   const [searchTask, setSearchTask] = useState<string>("");
   const [sortTask, setSortTask] = useState<"name" | "completed" | "none">("none");
   const [theme, setTheme] = useState<"light" | "dark">("light");
+  // const [dragTask, setDragTask] = useState<Tasks | null>(null)
 
 
   //EDIT TASK
@@ -34,11 +36,13 @@ function App() {
 
   const saveEdit = (id: number) => {
     setTasks((prev) => prev.map((tasks) => (tasks.id === id ? { ...tasks, title: editTask } : tasks)))
+    setEditId(null);
+    setEditTask("");
   }
 
   //ADD TASK
   const todoAdder = () => {
-    setTasks((prev) => [...prev, { id: Math.random(), title: input }]);
+    setTasks((prev) => [...prev, { id: Math.random(), title: input, completed: false }]);
   };
 
   //DELETE TASK
@@ -53,7 +57,8 @@ function App() {
 
   //COMPLETE/INCOMPLETE TASK 
   const toggleCompleteTask = (id: number) => {
-    setTasks((prev) => prev.map((task) => task.id == id ? { ...task, completed: !task.completed } : task))//if task completed ie completed=true , toggle into completed=false and viceversA
+    // if task completed ie completed=true , toggle into completed=false and vice versa
+    setTasks((prev) => prev.map((task) => task.id == id ? { ...task, completed: !task.completed } : task))
   }
 
   //SORT TASKS BY NAME AND COMPLETED TOGGLE CHECKBOX
@@ -66,6 +71,8 @@ function App() {
     }
     return 0;
   })
+
+
 
 
   return (
@@ -110,11 +117,15 @@ function App() {
               key={task.id}
               className="flex items-center justify-between p-2 border rounded"
             >
-              {editId === task.id ? (<input type="text" value={editTask} onChange={(e) => setEditTask(e.target.value)} />) : (<span>{task.title}</span>)}
+
+              {editId === task.id ? (<input id="edit_input" className=" border-1 border-black px-2 py-1 pointer" type="text" value={editTask} onChange={(e) => setEditTask(e.target.value)} />) : (<span className={task.completed ? "line-through" : ""} >{task.title}</span>)}
               <div className="flex gap-4">
                 <input type="checkbox" checked={task.completed} onChange={() => toggleCompleteTask(task.id)} />
 
-                {editId === task.id ? (<button onClick={() => saveEdit(task.id)}>Save</button>) : (<button onClick={() => startEdit(task)}>Edit</button>)}
+                {editId === task.id ? (<button onClick={() => saveEdit(task.id)} className="save_button">Save</button>) : (<button form="edit_input" onClick={() => startEdit(task)}>Edit</button>)}
+                {/* {<button onClick={()=>{if(saveEdit(task.id)){
+class=""
+                }}}></button>} */}
                 <button onClick={() => todoRemover(task.id)}>Delete</button>
 
               </div>
