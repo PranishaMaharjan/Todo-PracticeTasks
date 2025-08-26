@@ -5,7 +5,6 @@
 
 import "./App.css";
 import { useState } from "react";
-import { TBoard, TCard, TColumn } from '@/shared/data';
 
 type Tasks = {
   id: number;
@@ -23,10 +22,12 @@ function App() {
   const [editId, setEditId] = useState<number | null>(null);
   const [editTask, setEditTask] = useState<string>("");
   const [searchTask, setSearchTask] = useState<string>("");
-  const [sortTask, setSortTask] = useState<"name" | "completed" | "none">("none");
+  // const [sortTask, setSortTask] = useState<"name" | "completed" | "none">("none");
   const [theme, setTheme] = useState<"light" | "dark">("light");
-  // const [dragTask, setDragTask] = useState<Tasks | null>(null)
-
+  // const [completeTask, setCompleteTask] = useState<Tasks[]>([]);
+  // const [incompleteTask, setIncompleteTask] = useState<Tasks[]>([]);
+  const [dragTask, setDragTask] = useState<Tasks | null>(null)
+  const [dragOverId, setDragOverId] = useState<number | null>(null);
 
   //EDIT TASK
   const startEdit = (task: Tasks) => {
@@ -43,6 +44,7 @@ function App() {
   //ADD TASK
   const todoAdder = () => {
     setTasks((prev) => [...prev, { id: Math.random(), title: input, completed: false }]);
+    // setInput("")
   };
 
   //DELETE TASK
@@ -55,24 +57,102 @@ function App() {
   //SEARCH TASK
   const todoSearch = tasks.filter((e) => e.title.toLowerCase().includes(searchTask.toLowerCase()));
 
-  //COMPLETE/INCOMPLETE TASK 
-  const toggleCompleteTask = (id: number) => {
-    // if task completed ie completed=true , toggle into completed=false and vice versa
-    setTasks((prev) => prev.map((task) => task.id == id ? { ...task, completed: !task.completed } : task))
-  }
+  // //COMPLETE/INCOMPLETE TASK 
+  // const toggleCompleteTask = (id: number) => {
+  //   // if task completed ie completed=true , toggle into completed=false and vice versa
+  //   setTasks((prev) => prev.map((task) => task.id == id ? { ...task, completed: !task.completed } : task))
+  // }
 
   //SORT TASKS BY NAME AND COMPLETED TOGGLE CHECKBOX
-  const todoSort = [...todoSearch].sort((a, b) => {
-    if (sortTask === "name") {
-      return a.title.localeCompare(b.title);
-    }
-    if (sortTask === "completed") {
-      return Number(b.completed) - Number(a.completed);
-    }
-    return 0;
-  })
+  // const todoSort = [...todoSearch].sort((a, b) => {
+  //   if (sortTask === "name") {
+  //     return a.title.localeCompare(b.title);
+  //   }
+  //   if (sortTask === "completed") {
+  //     return Number(b.completed) - Number(a.completed);
+  //   }
+  //   return 0;
+  // })
+
+  //DRAG AND DROP
+  //Start dragging
+  const todoDrag = (task: Tasks) => {
+    setDragTask(task);
+  }
+
+  // Handle dragging over another item
+  const handleDragOver = (e: React.DragEvent, id: number) => {
+    e.preventDefault();
+    setDragOverId(id);
+  };
+
+  // Drop inside incomplete/complete column
+  const todoDrop = (completed: boolean) => {
+    if (!dragTask) return;
+
+    setTasks((prev: Tasks[]) => {
+      // remove dragged task from array
+      const updated = prev.filter((t) => t.id !== dragTask.id);
+
+      console.log(updated, 'updated task')
+      console.log(dragTask, 'drag task')
+
+      // find index of item we hovered on
+      const dropIndex = updated.findIndex((t) => t.id === dragOverId);
+      console.log(dragOverId, 'dragOverId')
+
+      console.log(dropIndex, 'id')
+
+      // update dragged task’s completed field
+      const newTask = { ...dragTask, completed };
+
+      if (dropIndex === -1) {
+        // if dropped on empty space, push to end
+        updated.push(newTask);
+      } else {
+        // insert before hovered item
+        updated.splice(dropIndex, 0, newTask);
+      }
+
+      return updated;
+    });
+
+    setDragTask(null);
+    setDragOverId(null);
+  };
+
+  //Droping
+  // const todoDrop = (to: "incomplete" | "complete") => {
 
 
+  //   if (!dragTask) return;
+
+  //   setTasks((prev) => prev.map((e) => e.id === dragTask.id ? { ...e, complete } : e));
+
+  //   //If from=to, no change
+  //   if (dragTask.from === to) {
+  //     setDragTask(null);
+  //     return
+  //   }
+
+  //   if (dragTask.from === "incomplete") {
+  //     setIncompleteTask((incompleteTask.filter((e) => e.id !== dragTask.task.id)))
+  //   }
+  //   else {
+  //     setCompleteTask((completeTask.filter((e) => e.id !== dragTask.task.id)));
+  //   }
+
+  //   if (to === "incomplete") {
+  //     setIncompleteTask([...incompleteTask, dragTask.task])
+  //   }
+  //   else {
+  //     setCompleteTask([...completeTask, dragTask.task])
+  //   }
+  //   setDragTask(null);
+  // }
+
+  const incomplete = [...todoSearch].filter((e) => !e.completed);
+  const complete = [...todoSearch].filter((e) => e.completed);
 
 
   return (
@@ -101,39 +181,78 @@ function App() {
 
         </div>
 
-        <div className="my-4 flex">
+        {/* <div className="my-4 flex">
           <select className="border-1 rounded-xl px-4 py-1" value={sortTask} onChange={(e) => setSortTask(e.target.value as "name" | "completed" | "none")} >
             <option value="none">No sorting</option>
             <option value="name">Sort by name</option>
             <option value="completed">Sort by completion</option>
           </select>
+        </div> */}
+
+
+        <div className="grid grid-cols-2">
+
+          {/*INCOMPLETE TASK COLUMN */}
+          <div className="p-4 border-black-2" onDragOver={(e) => e.preventDefault()} onDrop={() => todoDrop(false)} >
+            <h2>Incomplete Task</h2>
+            <ul className="space-y-2">
+              {incomplete.length > 0 ? (incomplete.map((task) => (
+                <li
+                  key={task.id}
+                  draggable
+                  className={`flex items-center justify-between p-2 border rounded`} onDragStart={() => todoDrag(task)} onDragOver={(e) => handleDragOver(e, task.id)}
+                >
+
+                  {editId === task.id ? (<input id="edit_input" className=" border-1 border-black px-2 py-1 pointer" type="text" value={editTask} onChange={(e) => setEditTask(e.target.value)} />) : (<span className={task.completed ? "line-through" : ""} >{task.title}</span>)}
+                  <div className="flex gap-4">
+                    {/* <input type="checkbox" checked={task.completed} onChange={() => toggleCompleteTask(task.id)} /> */}
+
+                    {editId === task.id ? (<button onClick={() => saveEdit(task.id)} className="save_button">Save</button>) : (<button form="edit_input" onClick={() => startEdit(task)}>Edit</button>)}
+                    {/* {<button onClick={()=>{if(saveEdit(task.id)){
+class=""
+                }}}></button>} */}
+                    <button onClick={() => todoRemover(task.id)}>Delete</button>
+
+                  </div>
+
+                </li>
+              ))) : "No tasks found"
+              }
+            </ul>
+          </div>
+
+          {/*COMPLETE TASK COLUMN */}
+          <div className="p-4 border-black-2" onDragOver={(e) => e.preventDefault()} onDrop={() => todoDrop(true)} >
+            <h2>Complete Task</h2>
+            <ul className="space-y-2">
+              {complete.length > 0 ? (complete.map((task) => (
+                <li
+                  key={task.id}
+                  className="flex items-center justify-between p-2 border rounded" draggable onDragStart={() => todoDrag(task)}
+                  onDragOver={(e) => handleDragOver(e, task.id)}
+                >
+
+                  {editId === task.id ? (<input id="edit_input" className=" border-1 border-black px-2 py-1 pointer" type="text" value={editTask} onChange={(e) => setEditTask(e.target.value)} />) : (<span className={task.completed ? "line-through" : ""} >{task.title}</span>)}
+                  <div className="flex gap-4">
+                    {/* <input type="checkbox" checked={task.completed} onChange={() => toggleCompleteTask(task.id)} /> */}
+
+                    {editId === task.id ? (<button onClick={() => saveEdit(task.id)} className="save_button">Save</button>) : (<button form="edit_input" onClick={() => startEdit(task)}>Edit</button>)}
+                    {/* {<button onClick={()=>{if(saveEdit(task.id)){
+class=""
+                }}}></button>} */}
+                    <button onClick={() => todoRemover(task.id)}>Delete</button>
+
+                  </div>
+
+                </li>
+              ))) : "No tasks found"
+              }
+            </ul>
+          </div>
         </div>
 
 
-        <ul className="space-y-2">
 
-          {todoSort.length > 0 ? (todoSort.map((task) => (
-            <li
-              key={task.id}
-              className="flex items-center justify-between p-2 border rounded"
-            >
-
-              {editId === task.id ? (<input id="edit_input" className=" border-1 border-black px-2 py-1 pointer" type="text" value={editTask} onChange={(e) => setEditTask(e.target.value)} />) : (<span className={task.completed ? "line-through" : ""} >{task.title}</span>)}
-              <div className="flex gap-4">
-                <input type="checkbox" checked={task.completed} onChange={() => toggleCompleteTask(task.id)} />
-
-                {editId === task.id ? (<button onClick={() => saveEdit(task.id)} className="save_button">Save</button>) : (<button form="edit_input" onClick={() => startEdit(task)}>Edit</button>)}
-                {/* {<button onClick={()=>{if(saveEdit(task.id)){
-class=""
-                }}}></button>} */}
-                <button onClick={() => todoRemover(task.id)}>Delete</button>
-
-              </div>
-
-            </li>
-          ))) : "No tasks found"}
-
-        </ul>
 
         {/* <AsncWrapper isError={peopleAPI.isError} isLoading={peopleAPI.isLoading} component={
         <div>
@@ -151,7 +270,7 @@ class=""
         </div>
       } /> */}
       </div>
-    </div>
+    </div >
 
   );
 }
