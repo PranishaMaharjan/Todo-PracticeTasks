@@ -26,7 +26,8 @@ function App() {
   const [searchTask, setSearchTask] = useState<string>("");
   const [sortTask, setSortTask] = useState<"name" | "completed" | "none">("none");
   const [theme, setTheme] = useState<"light" | "dark">("light");
-  // const [dragTask, setDragTask] = useState<Tasks | null>(null)
+  const [dragTask, setDragTask] = useState<Tasks | null>(null)
+  const [dragOverId, setDragOverId] = useState<number | null>();
 
 
   //EDIT TASK
@@ -229,146 +230,118 @@ function App() {
 
         </div>
 
-        <div className="my-4 flex">
+        {/* <div className="my-4 flex">
           <select className="border-1 rounded-xl px-4 py-1" value={sortTask} onChange={(e) => setSortTask(e.target.value as "name" | "completed" | "none")} >
             <option value="none">No sorting</option>
             <option value="name">Sort by name</option>
             <option value="completed">Sort by completion</option>
-          </select>
-          {/* DND Packages */}
-          <div className="grid grid-cols-2 gap-4">
+          </select> */}
 
-            <Column
-              title="Incomplete Tasks"
-              completed={false}
-              tasks={incomplete}
-              onTaskMove={(task, completed) =>
-                setTasks((prev) =>
-                  prev.map((t) => (t.id === task.id ? { ...t, completed } : t))
-                )
-              }
 
-            >
-              <button>Hello</button>
-            </Column>
+        {/* DND Packages */}
+        <div className="grid grid-cols-2 gap-4">
 
-            <Column
-              title="Complete Tasks"
-              completed={true}
-              tasks={complete}
-              onTaskMove={(task, completed) =>
-                setTasks((prev) =>
-                  prev.map((t) => (t.id === task.id ? { ...t, completed } : t))
-                )
-              }
-            />
+          <Column
+            title="Incomplete Tasks"
+            completed={false}
+            tasks={incomplete}
+            onTaskMove={(task, completed) =>
+              setTasks((prev) =>
+                prev.map((t) => (t.id === task.id ? { ...t, completed } : t))
+              )
+            }
 
-            {/* <Column title="Complete Task" completed={true} tasks={complete} /> */}
+          >
+            {/* <button>Hello</button> */}
+          </Column>
+
+          <Column
+            title="Complete Tasks"
+            completed={true}
+            tasks={complete}
+            onTaskMove={(task, completed) =>
+              setTasks((prev) =>
+                prev.map((t) => (t.id === task.id ? { ...t, completed } : t))
+              )
+            }
+          />
+
+          {/* <Column title="Complete Task" completed={true} tasks={complete} /> */}
+        </div>
+
+
+        {/* <ul className="space-y-2"> */}
+
+        {/* {todoSort.length > 0 ? (todoSort.map((task) => ( */}
+        <li
+          key={task.id}
+          className="flex items-center justify-between p-2 border rounded"
+        >
+          {/* No DND Packages */}
+          <div className="grid grid-cols-2 rounded min-h-[200px] gap-4">
+            {/*INCOMPLETE TASK COLUMN */}
+            <div className="drop-column p-4 border-2 border-black-900 " onDragOver={(e) => e.preventDefault()} onDrop={() => todoDrop(false)} >
+              <h2 className="font-bold">Incomplete Task</h2>
+              <ul className="space-y-2">
+                {incomplete.length > 0 ? (incomplete.map((task) => (
+                  <li
+                    key={task.id}
+                    draggable
+                    className={`draggable-task flex items-center justify-between p-2 border rounded`} onDragStart={() => todoDrag(task)} onDragOver={(e) => handleDragOver(e, task.id)}
+                  >
+
+                    {editId === task.id ? (<input id="edit_input" className=" border-1 border-black px-2 py-1 pointer" type="text" value={editTask} onChange={(e) => setEditTask(e.target.value)} />) : (<span className={task.completed ? "line-through" : ""} >{task.title}</span>)}
+                    <div className="flex gap-4">
+                      <input type="checkbox" checked={task.completed} onChange={() => toggleCompleteTask(task.id)} />
+
+                      {editId === task.id ? (<button onClick={() => saveEdit(task.id)} className="save_button">Save</button>) : (<button form="edit_input" onClick={() => startEdit(task)}>Edit</button>)}
+
+                      <button onClick={() => todoRemover(task.id)}>Delete</button>
+
+                    </div>
+
+                  </li>
+
+                ))) : "No tasks found"}
+
+
+              </ul>
+            </div>
+
+
+            {/* </div> */}
+
+            {/*COMPLETE TASK COLUMN */}
+            < div className="p-4 border-black-2  border-2 border-black-900 " onDragOver={(e) => e.preventDefault()} onDrop={() => todoDrop(true)} >
+              <h2 className="font-bold">Complete Task</h2>
+              <ul className="space-y-2">
+                {complete.length > 0 ? (complete.map((task) => (
+                  <li
+                    key={task.id}
+                    className="flex items-center justify-between p-2 border rounded" draggable onDragStart={() => todoDrag(task)}
+                    onDragOver={(e) => handleDragOver(e, task.id)}
+                  >
+
+                    {editId === task.id ? (<input id="edit_input" className=" border-1 border-black px-2 py-1 pointer" type="text" value={editTask} onChange={(e) => setEditTask(e.target.value)} />) : (<span className={task.completed ? "line-through" : ""} >{task.title}</span>)}
+                    <div className="flex gap-4">
+                      {/* <input type="checkbox" checked={task.completed} onChange={() => toggleCompleteTask(task.id)} /> */}
+
+                      {editId === task.id ? (<button onClick={() => saveEdit(task.id)} className="save_button">Save</button>) : (<button form="edit_input" onClick={() => startEdit(task)}>Edit</button>)}
+                      {/* {<button onClick={()=>{if(saveEdit(task.id)){
+class=""
+                }}}></button>} */}
+                      <button onClick={() => todoRemover(task.id)}>Delete</button>
+
+                    </div>
+
+                  </li>
+                ))) : "No tasks found"
+                }
+              </ul>
+
+            </div>
           </div>
 
-
-          <ul className="space-y-2">
-
-            {todoSort.length > 0 ? (todoSort.map((task) => (
-              <li
-                key={task.id}
-                className="flex items-center justify-between p-2 border rounded"
-              >
-                {/* No DND Packages */}
-                <div className="grid grid-cols-2 rounded min-h-[200px] gap-4">
-                  {/*INCOMPLETE TASK COLUMN */}
-                  <div className="drop-column p-4 border-2 border-black-900 " onDragOver={(e) => e.preventDefault()} onDrop={() => todoDrop(false)} >
-                    <h2 className="font-bold">Incomplete Task</h2>
-                    <ul className="space-y-2">
-                      {incomplete.length > 0 ? (incomplete.map((task) => (
-                        <li
-                          key={task.id}
-                          draggable
-                          className={`draggable-task flex items-center justify-between p-2 border rounded`} onDragStart={() => todoDrag(task)} onDragOver={(e) => handleDragOver(e, task.id)}
-                        >
-
-                          {editId === task.id ? (<input id="edit_input" className=" border-1 border-black px-2 py-1 pointer" type="text" value={editTask} onChange={(e) => setEditTask(e.target.value)} />) : (<span className={task.completed ? "line-through" : ""} >{task.title}</span>)}
-                          <div className="flex gap-4">
-                            <input type="checkbox" checked={task.completed} onChange={() => toggleCompleteTask(task.id)} />
-
-                            {editId === task.id ? (<button onClick={() => saveEdit(task.id)} className="save_button">Save</button>) : (<button form="edit_input" onClick={() => startEdit(task)}>Edit</button>)}
-                            {/* {<button onClick={()=>{if(saveEdit(task.id)){
-class=""
-                }}}></button>} */}
-                            <button onClick={() => todoRemover(task.id)}>Delete</button>
-
-                          </div>
-
-                        </li>
-                      ))) : "No tasks found"}
-
-                    </ul>
-                  </li>
-                  ))) : "No tasks found"
-              }
-                </ul>
-              </div>
-
-          {/*COMPLETE TASK COLUMN */ }
-              < div className = "p-4 border-black-2  border-2 border-black-900 " onDragOver = {(e) => e.preventDefault()} onDrop={() => todoDrop(true)} >
-            <h2 className="font-bold">Complete Task</h2>
-            <ul className="space-y-2">
-              {complete.length > 0 ? (complete.map((task) => (
-                <li
-                  key={task.id}
-                  className="flex items-center justify-between p-2 border rounded" draggable onDragStart={() => todoDrag(task)}
-                  onDragOver={(e) => handleDragOver(e, task.id)}
-                >
-
-                  {editId === task.id ? (<input id="edit_input" className=" border-1 border-black px-2 py-1 pointer" type="text" value={editTask} onChange={(e) => setEditTask(e.target.value)} />) : (<span className={task.completed ? "line-through" : ""} >{task.title}</span>)}
-                  <div className="flex gap-4">
-                    {/* <input type="checkbox" checked={task.completed} onChange={() => toggleCompleteTask(task.id)} /> */}
-
-                    {editId === task.id ? (<button onClick={() => saveEdit(task.id)} className="save_button">Save</button>) : (<button form="edit_input" onClick={() => startEdit(task)}>Edit</button>)}
-                    {/* {<button onClick={()=>{if(saveEdit(task.id)){
-class=""
-                }}}></button>} */}
-                    <button onClick={() => todoRemover(task.id)}>Delete</button>
-
-                  </div>
-
-                </li>
-              ))) : "No tasks found"
-              }
-            </ul>
-          </>
-        </div>
+        </li>
 
 
-
-
-        {/* <AsncWrapper isError={peopleAPI.isError} isLoading={peopleAPI.isLoading} component={
-        <div>
-          {
-            //@ts-ignore
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            peopleAPI?.data?.data?.map((item: any) => {
-              return <div key={`todos-${item.id}`}>
-                <p>UserId:{item.userId}</p>
-                <p>Title:{item.title}</p>
-              </div>
-            })
-          }
-          {JSON.stringify(peopleAPI.data)}
-        </div>
-      } /> */}
-      </div>
-    </div >
-
-  );
-}
-
-export default App;
-
-// const AsncWrapper = ({ isError, isLoading, component }: { isLoading: boolean, isError: boolean, component: React.ReactNode }) => {
-//   return <div>
-//     {isLoading && <div>Loading...</div>}
-//     {isError && <div>Error Occurred...</div>}
-//     {!isError && !isLoading && component}
-//   </div>
-// }
