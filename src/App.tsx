@@ -24,7 +24,7 @@ function App() {
   const [editId, setEditId] = useState<number | null>(null);
   const [editTask, setEditTask] = useState<string>("");
   const [searchTask, setSearchTask] = useState<string>("");
-  const [sortTask, setSortTask] = useState<"name" | "completed" | "none">("none");
+  // const [sortTask, setSortTask] = useState<"name" | "completed" | "none">("none");
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [dragTask, setDragTask] = useState<Tasks | null>(null)
   const [dragOverId, setDragOverId] = useState<number | null>();
@@ -53,8 +53,9 @@ function App() {
   //   const removeTasks = tasks.filter((e) => e.id !== id);
   //   setTasks(removeTasks);
   // };
+
   const todoRemover = (id: number) => {
-    const removeTasks = tasks.filter((t) => t.id !== id);
+    const removeTasks = tasks.filter((t) => t.id !== id)
     setTasks(removeTasks)
   }
 
@@ -68,15 +69,15 @@ function App() {
   }
 
   //SORT TASKS BY NAME AND COMPLETED TOGGLE CHECKBOX
-  const todoSort = [...todoSearch].sort((a, b) => {
-    if (sortTask === "name") {
-      return a.title.localeCompare(b.title);
-    }
-    if (sortTask === "completed") {
-      return Number(b.completed) - Number(a.completed);
-    }
-    return 0;
-  })
+  // const todoSort = [...todoSearch].sort((a, b) => {
+  //   if (sortTask === "name") {
+  //     return a.title.localeCompare(b.title);
+  //   }
+  //   if (sortTask === "completed") {
+  //     return Number(b.completed) - Number(a.completed);
+  //   }
+  //   return 0;
+  // })
 
 
 
@@ -344,4 +345,6 @@ class=""
 
         </li>
 
-
+      </div></div>)
+}
+export default App
